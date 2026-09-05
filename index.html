@@ -73,7 +73,7 @@ svg{display:inline-block;vertical-align:middle}
 .fb .av{width:40px;height:40px;font-size:16px}
 .fb-h small{color:#65676b;font-size:13px}
 .fb-t{padding:4px 16px 12px;white-space:pre-wrap;line-height:1.35}
-.fb-img{width:100%;display:block}
+.fb-img{width:100%;display:block}.fb-img.ph{aspect-ratio:4/3}
 .fb-s{display:flex;justify-content:space-between;align-items:center;padding:10px 0;color:#65676b;border-bottom:1px solid #ced0d4;margin:0 16px}
 .fb-rx{display:inline-flex;align-items:center}
 .fb-rx i{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-style:normal;margin-right:-5px;border:1px solid #fff}
@@ -212,24 +212,24 @@ fb:{name:'Facebook',f:[
  ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Posted','d',ago2h],
  ['priv','Privacy','s',['🌐 Public','👥 Friends','🔒 Only me']],
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.'],
- ['photo','Photo (optional)','i'],['rx','Reactions','t','1.8K'],['cc','Comments','t','412'],['sh','Shares','t','96'],
+ ['photo','Post photo','i'],['rx','Reactions','t','1.8K'],['cc','Comments','t','412'],['sh','Shares','t','96'],
  ['cmts','Comments (one per line: name: text)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${fbT(D(v.time))} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
  <div class="fb-t">${nl(v.text)}</div>
- ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:''}
+ ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:'<div class="fb-img ph"></div>'}
  <div class="fb-s"><span class="fb-rx"><i style="background:#1877f2">👍</i><i style="background:#f33e58">❤️</i><em>${esc(v.rx)}</em></span><span>${esc(v.cc)} comments · ${esc(v.sh)} shares</span></div>
  <div class="fb-a"><span>${ic('thumb')}Like</span><span>${ic('cmt')}Comment</span><span>${ic('share')}Share</span></div>
  ${cmts(v.cmts).map(x=>`<div class="fb-c">${av(v['pic:'+x.n],x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
 im:{name:'iMessage',f:[
  ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['time','Time','d',loc(new Date(new Date().setHours(9,41,0,0)))],
- ['sms','Green bubbles (SMS)','c',0],['deliv','Show "Delivered"','c',1],
+ ['sms','Green bubbles (SMS)','c',0],['rcpt','Receipt under last sent','s',['Delivered','Read','None']],
  ['msgs','Messages (start a line with > for your own)','a','Did you finish your homework?\n>Almost done!\n>Can I go to Sam\'s after?\nSure. Be home by 6 🙂']],
  r:v=>{const m=msgs(v.msgs),d=D(v.time),[d1,d2]=imT(d),last=m.findLastIndex(x=>x.s);return `
  <div class="im-sb"><b>${tm(d).replace(/ [AP]M/,'')}</b><span><span class="sig"><i></i><i></i><i></i><i></i></span>${ic('wifi',{'stroke-width':2.5})}<i class="bat"></i></span></div>
  <div class="im-h">${ic('back',{'stroke-width':2.5})}<div class="im-c">${av(v.avatar,v.name)}<small>${esc(v.name)} ›</small></div>${ic('video')}</div>
  <div class="im-msgs ${v.sms?'sms':''}"><div class="im-date"><b>${d1}</b> ${d2}</div>
- ${m.map((x,i)=>`<div class="b ${x.s?'s':'r'} ${!m[i+1]||m[i+1].s!=x.s?'tail':''}">${esc(x.t)}</div>${v.deliv&&i==last?'<div class="im-d">Delivered</div>':''}`).join('')}</div>
+ ${m.map((x,i)=>`<div class="b ${x.s?'s':'r'} ${!m[i+1]||m[i+1].s!=x.s?'tail':''}">${esc(x.t)}</div>${i==last&&v.rcpt!='None'?`<div class="im-d">${v.rcpt=='Read'?'Read '+tm(d):'Delivered'}</div>`:''}`).join('')}</div>
  <div class="im-in"><span class="im-plus">${ic('plus',{'stroke-width':2.2})}</span><div class="im-pill">${v.sms?'Text Message':'iMessage'}${ic('mic',{'stroke-width':1.8})}</div></div><div class="im-home"></div>`}}
 };
 
