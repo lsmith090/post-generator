@@ -13,6 +13,8 @@ Mock social-media post + chat generator for Tamara's middle-school classroom (hi
 1. Post generators: Instagram, X, Facebook — done first pass. TikTok / Snapchat / YouTube maybe later.
 2. Chat generators, iMessage first — done first pass. WhatsApp / Messenger / Snapchat / Instagram DM later.
 
+## Hosting
+- Hosting: GitHub Pages from `main:/`, public repo, https://posts.thornology.com (CNAME → lsmith090.github.io, DNS-only in Cloudflare, same as emoji-picker).
+
 ## Open
-- Hosting undecided (emoji-picker used GitHub Pages + `*.thornology.com` CNAME). Decide once Tamara's tried it.
 - Dark mode, save/restore work (localStorage), images inside chat bubbles — only if asked.
