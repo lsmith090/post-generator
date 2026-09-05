@@ -1,0 +1,260 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Post Generator</title>
+<style id="css">
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#eef0f3;color:#111}
+header{display:flex;gap:.4rem;padding:.6rem 1rem;background:#fff;border-bottom:1px solid #ddd;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:1}
+header h1{font-size:1rem;margin:0 1rem 0 0}
+nav{display:flex;gap:.3rem;flex-wrap:wrap}
+nav button{font:inherit;font-size:.9rem;padding:.3rem .8rem;border:0;border-radius:1rem;background:#eee;cursor:pointer}
+nav button.on{background:#111;color:#fff}
+main{display:grid;grid-template-columns:320px 1fr;gap:1rem;padding:1rem;max-width:1100px;margin:auto}
+@media(max-width:720px){main{grid-template-columns:1fr}}
+form[hidden]{display:none}
+form{display:flex;flex-direction:column;gap:.5rem;background:#fff;padding:1rem;border-radius:.6rem;border:1px solid #ddd}
+label{font-size:.8rem;color:#555;display:flex;flex-direction:column;gap:.15rem}
+label.row{flex-direction:row;align-items:center;gap:.4rem}
+input,textarea,select{font:inherit;font-size:.95rem;padding:.35rem .5rem;border:1px solid #ccc;border-radius:.4rem}
+textarea{min-height:4.5rem;resize:vertical}
+#out{display:flex;flex-direction:column;align-items:center;gap:.8rem;overflow-x:auto}
+#btns{display:flex;gap:.5rem}
+#btns button{font:inherit;padding:.5rem 1rem;border:0;border-radius:.5rem;background:#111;color:#fff;cursor:pointer}
+.hint{font-size:.8rem;color:#777;margin:0}
+#toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+
+/* ---- shared card ---- */
+.card{background:#fff;color:#000;position:relative;overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.stamp{position:absolute;right:6px;bottom:3px;font-size:9px;color:#c4c4c4;letter-spacing:.5px;text-transform:uppercase}
+.av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:600;font-size:14px}
+.vb{width:16px;height:16px;flex:none}
+.dots{margin-left:auto;font-weight:700;letter-spacing:1px;color:#262626}
+svg{display:inline-block;vertical-align:middle}
+
+/* ---- instagram ---- */
+.ig{width:420px;border:1px solid #dbdbdb;border-radius:8px;font-size:14px;padding-bottom:6px}
+.ig-h{display:flex;align-items:center;gap:10px;padding:10px 12px}
+.ig-h div{display:flex;flex-direction:column;line-height:1.2}
+.ig-h b{display:flex;align-items:center;gap:3px}
+.ig-h small{color:#555;font-size:12px}
+.ig-img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
+.ph{background:linear-gradient(135deg,#fdd7e4,#c8e3ff)}
+.ig-acts{display:flex;gap:14px;padding:8px 12px 4px;align-items:center}
+.ig-acts svg{width:24px;height:24px}
+.ig-acts .sp{flex:1}
+.ig-b{padding:2px 12px;line-height:1.35}
+.grey{color:#737373}
+.sm{font-size:11px;text-transform:uppercase;letter-spacing:.2px;padding-top:6px;padding-bottom:6px}
+
+/* ---- x / twitter ---- */
+.x{width:500px;padding:12px 16px;font-size:15px;border:1px solid #eff3f4;border-radius:16px;color:#0f1419}
+.x-h{display:flex;gap:10px;align-items:center}
+.x .av{width:40px;height:40px;font-size:16px}
+.x-n{font-weight:700;display:flex;align-items:center;gap:3px}
+.x-u{color:#536471;font-weight:400}
+.x-t{font-size:17px;margin:12px 0;white-space:pre-wrap;line-height:1.4}
+.x-img{width:100%;border-radius:16px;display:block;margin-bottom:12px;border:1px solid #cfd9de}
+.x-m{color:#536471;padding:4px 0 12px;border-bottom:1px solid #eff3f4}
+.x-m b,.x-c b{color:#0f1419}
+.x-c{display:flex;gap:18px;padding:12px 0;border-bottom:1px solid #eff3f4;color:#536471;font-size:14px}
+.x-a{display:flex;justify-content:space-around;padding:10px 0 6px;color:#536471;border-bottom:1px solid #eff3f4}
+.x-a svg{width:20px;height:20px}
+.x-r{display:flex;gap:10px;padding:12px 0 6px;line-height:1.35}
+
+/* ---- facebook ---- */
+.fb{width:500px;border-radius:8px;box-shadow:0 1px 2px rgba(0,0,0,.2);font-size:15px;padding-bottom:12px;color:#050505}
+.fb-h{display:flex;gap:8px;padding:12px 16px 4px;align-items:center}
+.fb-h div{display:flex;flex-direction:column;line-height:1.25}
+.fb-h b{display:flex;align-items:center;gap:3px}
+.fb .av{width:40px;height:40px;font-size:16px}
+.fb-h small{color:#65676b;font-size:13px}
+.fb-t{padding:4px 16px 12px;white-space:pre-wrap;line-height:1.35}
+.fb-img{width:100%;display:block}
+.fb-s{display:flex;justify-content:space-between;align-items:center;padding:10px 0;color:#65676b;border-bottom:1px solid #ced0d4;margin:0 16px}
+.fb-rx{display:inline-flex;align-items:center}
+.fb-rx i{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:10px;font-style:normal;margin-right:-5px;border:1px solid #fff}
+.fb-rx em{font-style:normal;margin-left:10px}
+.fb-a{display:flex;justify-content:space-around;padding:4px 0;color:#65676b;font-weight:600;border-bottom:1px solid #ced0d4;margin:0 16px}
+.fb-a span{display:flex;align-items:center;gap:6px;padding:8px}
+.fb-a svg{width:18px;height:18px}
+.fb-c{display:flex;gap:6px;padding:10px 16px 0;align-items:flex-start}
+.fb-c .av{width:32px;height:32px;font-size:14px}
+.fb-c div{background:#f0f2f5;border-radius:18px;padding:8px 12px;line-height:1.3}
+.fb-c b{display:block;font-size:13px}
+.fb-cm{display:flex;gap:14px;color:#65676b;font-size:12px;font-weight:600;padding:3px 0 0 66px}
+
+/* ---- imessage ---- */
+.im{width:390px;font-family:-apple-system,"SF Pro Text","Helvetica Neue",Roboto,system-ui,sans-serif;font-size:17px;border:1px solid #ddd}
+.im-sb{display:flex;justify-content:space-between;align-items:center;padding:14px 28px 4px 32px;font-weight:600;font-size:16px}
+.im-sb span{display:flex;gap:6px;align-items:center}
+.im-sb svg{width:16px;height:16px}
+.sig{display:flex;gap:1.5px;align-items:flex-end;height:11px}
+.sig i{width:3px;background:#000;border-radius:1px}
+.sig i:nth-child(1){height:4px}.sig i:nth-child(2){height:6px}.sig i:nth-child(3){height:8px}.sig i:nth-child(4){height:11px}
+.bat{width:25px;height:12px;border:1px solid #0006;border-radius:4px;padding:1.5px;position:relative;display:block}
+.bat::before{content:"";display:block;height:100%;width:100%;background:#000;border-radius:2px}
+.bat::after{content:"";position:absolute;right:-4px;top:3px;width:2px;height:5px;background:#0006;border-radius:0 2px 2px 0}
+.im-h{display:flex;align-items:flex-end;justify-content:space-between;padding:4px 14px 8px;border-bottom:1px solid #e5e5ea;background:#f9f9f9}
+.im-h>svg{width:26px;height:26px;stroke:#007aff;margin-bottom:12px}
+.im-c{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:#000}
+.im-c .av{width:50px;height:50px;font-size:20px}
+.im-msgs{display:flex;flex-direction:column;gap:2px;padding:12px 16px 4px;min-height:200px}
+.im-date{text-align:center;color:#8e8e93;font-size:11px;margin-bottom:8px}
+.b{max-width:75%;padding:8px 14px;border-radius:18px;line-height:1.25;position:relative;white-space:pre-wrap;overflow-wrap:break-word}
+.b.r{align-self:flex-start;background:#e9e9eb;color:#000}
+.b.s{align-self:flex-end;background:#007aff;color:#fff}
+.sms .b.s{background:#34c759}
+.b.tail{margin-bottom:8px}
+.b.tail::before{content:"";position:absolute;bottom:0;width:20px;height:25px}
+.b.tail::after{content:"";position:absolute;bottom:0;width:26px;height:25px;background:#fff}
+.b.r.tail::before{left:-7px;border-bottom-right-radius:16px 14px;background:#e9e9eb}
+.b.r.tail::after{left:-26px;border-bottom-right-radius:10px}
+.b.s.tail::before{right:-7px;border-bottom-left-radius:16px 14px;background:#007aff}
+.sms .b.s.tail::before{background:#34c759}
+.b.s.tail::after{right:-26px;border-bottom-left-radius:10px}
+.im-d{align-self:flex-end;color:#8e8e93;font-size:11px;font-weight:600;margin:-6px 4px 0 0}
+.im-in{display:flex;align-items:center;gap:10px;padding:8px 14px 26px}
+.im-plus{width:32px;height:32px;border-radius:50%;background:#e9e9eb;color:#8e8e93;display:grid;place-items:center;font-size:24px;line-height:1;flex:none}
+.im-pill{flex:1;border:1px solid #d1d1d6;border-radius:20px;padding:5px 8px 5px 12px;color:#c7c7cc;display:flex;justify-content:space-between;align-items:center;font-size:16px}
+.im-pill svg{width:20px;height:20px;stroke:#8e8e93}
+</style>
+<header>
+  <h1>Post Generator</h1>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <div id="forms"></div>
+  <div id="out">
+    <div id="prev"></div>
+    <div id="btns"><button id="dl">Download PNG</button><button id="cp">Copy image</button></div>
+    <p class="hint">Copy, then paste into Docs / Slides with Ctrl+V.</p>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nl=s=>esc(s).replace(/\n/g,'<br>');
+const lines=s=>String(s).split('\n').map(l=>l.trim()).filter(Boolean);
+// "name: text" per line; no colon → anonymous "user"
+const cmts=s=>lines(s).map(l=>{const i=l.indexOf(':');return i<0?{n:'user',t:l}:{n:l.slice(0,i).trim(),t:l.slice(i+1).trim()}});
+// lines starting with ">" are sent (blue), everything else received (grey)
+const msgs=s=>lines(s).map(l=>l[0]=='>'?{s:1,t:l.slice(1).trim()}:{s:0,t:l});
+const hue=s=>[...s].reduce((h,c)=>(h*31+c.charCodeAt(0))%360,0);
+const av=(src,name)=>src?`<img class="av" src="${src}" alt="">`:`<div class="av" style="background:hsl(${hue(name||'')},45%,55%)">${esc((name||'').trim()[0]||'?').toUpperCase()}</div>`;
+
+// Feather icons (MIT)
+const P={heart:'M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z',
+cmt:'M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z',
+send:'M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z',bm:'M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z',
+rt:'M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3',
+share:'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
+thumb:'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
+back:'M15 18l-6-6 6-6',video:'M23 7l-7 5 7 5V7zM1 7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z',
+wifi:'M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01',
+mic:'M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8'};
+const ic=(k,a={})=>{a={fill:'none',stroke:'currentColor','stroke-width':2,...a};return `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(' ')}><path d="${P[k]}"/></svg>`};
+const vb=c=>`<svg class="vb" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${c}"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const dots='<span class="dots">···</span>';
+
+// fields: [id, label, type, default]  types: t=text a=textarea i=image c=checkbox s=select
+const G={
+ig:{name:'Instagram',f:[
+ ['user','Username','t','abraham.lincoln'],['ver','Verified','c',1],['avatar','Profile photo','i'],['loc','Location','t','Gettysburg, PA'],
+ ['photo','Post photo','i'],['cap','Caption','a','Four score and seven years ago… #Gettysburg #1863'],
+ ['likes','Likes','t','1,863'],['liked','Liked (red heart)','c',1],
+ ['cmts','Comments (one per line: name: text)','a','mary.todd: So proud of you ❤️\nu.s.grant: Well said, sir.'],
+ ['time','Time ago','t','2 hours ago']],
+ r:v=>{const c=cmts(v.cmts);return `
+ <div class="ig-h">${av(v.avatar,v.user)}<div><b>${esc(v.user)}${v.ver?vb('#0095f6'):''}</b><small>${esc(v.loc)}</small></div>${dots}</div>
+ ${v.photo?`<img class="ig-img" src="${v.photo}" alt="">`:'<div class="ig-img ph"></div>'}
+ <div class="ig-acts">${ic('heart',v.liked?{fill:'#ed4956',stroke:'#ed4956'}:{})}${ic('cmt')}${ic('send')}<span class="sp"></span>${ic('bm')}</div>
+ <div class="ig-b"><b>${esc(v.likes)} likes</b></div>
+ <div class="ig-b"><b>${esc(v.user)}</b> ${nl(v.cap)}</div>
+ ${c.length>2?`<div class="ig-b grey">View all ${c.length} comments</div>`:''}
+ ${c.map(x=>`<div class="ig-b"><b>${esc(x.n)}</b> ${esc(x.t)}</div>`).join('')}
+ <div class="ig-b grey sm">${esc(v.time)}</div>`}},
+x:{name:'X / Twitter',f:[
+ ['name','Name','t','Abraham Lincoln'],['handle','Handle','t','honestabe'],['ver','Verified','c',1],['avatar','Profile photo','i'],
+ ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty. #Gettysburg'],
+ ['photo','Photo (optional)','i'],['time','Time · date','t','3:15 PM · Nov 19, 1863'],['views','Views','t','272K'],
+ ['rts','Reposts','t','1,863'],['quotes','Quotes','t','412'],['likes','Likes','t','16.3K'],['bms','Bookmarks','t','2,024'],
+ ['replies','Replies (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ r:v=>`
+ <div class="x-h">${av(v.avatar,v.name)}<div><div class="x-n">${esc(v.name)}${v.ver?vb('#1d9bf0'):''}</div><div class="x-u">@${esc(v.handle)}</div></div>${dots}</div>
+ <div class="x-t">${nl(v.text)}</div>
+ ${v.photo?`<img class="x-img" src="${v.photo}" alt="">`:''}
+ <div class="x-m">${esc(v.time)} · <b>${esc(v.views)}</b> Views</div>
+ <div class="x-c"><span><b>${esc(v.rts)}</b> Reposts</span><span><b>${esc(v.quotes)}</b> Quotes</span><span><b>${esc(v.likes)}</b> Likes</span><span><b>${esc(v.bms)}</b> Bookmarks</span></div>
+ <div class="x-a">${ic('cmt')}${ic('rt')}${ic('heart')}${ic('bm')}${ic('share')}</div>
+ ${cmts(v.replies).map(x=>`<div class="x-r">${av('',x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
+fb:{name:'Facebook',f:[
+ ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Time','t','2h'],
+ ['priv','Privacy','s',['🌐 Public','👥 Friends','🔒 Only me']],
+ ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.'],
+ ['photo','Photo (optional)','i'],['rx','Reactions','t','1.8K'],['cc','Comments','t','412'],['sh','Shares','t','96'],
+ ['cmts','Comments (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ r:v=>`
+ <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${esc(v.time)} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
+ <div class="fb-t">${nl(v.text)}</div>
+ ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:''}
+ <div class="fb-s"><span class="fb-rx"><i style="background:#1877f2">👍</i><i style="background:#f33e58">❤️</i><em>${esc(v.rx)}</em></span><span>${esc(v.cc)} comments · ${esc(v.sh)} shares</span></div>
+ <div class="fb-a"><span>${ic('thumb')}Like</span><span>${ic('cmt')}Comment</span><span>${ic('share')}Share</span></div>
+ ${cmts(v.cmts).map(x=>`<div class="fb-c">${av('',x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
+im:{name:'iMessage',f:[
+ ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['clock','Clock','t','9:41'],['date','Date label','t','Today 9:41 AM'],
+ ['sms','Green bubbles (SMS)','c',0],['deliv','Show "Delivered"','c',1],
+ ['msgs','Messages (start a line with > for your own)','a','Did you finish your homework?\n>Almost done!\n>Can I go to Sam\'s after?\nSure. Be home by 6 🙂']],
+ r:v=>{const m=msgs(v.msgs),[d1,...d2]=v.date.split(' ');return `
+ <div class="im-sb"><b>${esc(v.clock)}</b><span><span class="sig"><i></i><i></i><i></i><i></i></span>${ic('wifi',{'stroke-width':2.5})}<i class="bat"></i></span></div>
+ <div class="im-h">${ic('back',{'stroke-width':2.5})}<div class="im-c">${av(v.avatar,v.name)}<small>${esc(v.name)} ›</small></div>${ic('video')}</div>
+ <div class="im-msgs ${v.sms?'sms':''}"><div class="im-date"><b>${esc(d1)}</b> ${esc(d2.join(' '))}</div>
+ ${m.map((x,i)=>`<div class="b ${x.s?'s':'r'} ${!m[i+1]||m[i+1].s!=x.s?'tail':''}">${esc(x.t)}</div>`).join('')}
+ ${v.deliv&&m.length&&m[m.length-1].s?'<div class="im-d">Delivered</div>':''}</div>
+ <div class="im-in"><span class="im-plus">+</span><div class="im-pill">${v.sms?'Text Message':'iMessage'}${ic('mic',{'stroke-width':1.8})}</div></div>`}}
+};
+
+// ---- forms + state ----
+const S={};let cur=G[location.hash.slice(1)]?location.hash.slice(1):'ig';
+for(const k in G){
+ const f=document.createElement('form');f.dataset.g=k;f.hidden=true;
+ f.innerHTML=G[k].f.map(([id,l,t,d])=>
+  t=='a'?`<label>${l}<textarea name="${id}">${esc(d)}</textarea></label>`:
+  t=='i'?`<label>${l}<input type="file" name="${id}" accept="image/*"></label>`:
+  t=='c'?`<label class="row"><input type="checkbox" name="${id}" ${d?'checked':''}>${l}</label>`:
+  t=='s'?`<label>${l}<select name="${id}">${d.map(o=>`<option>${o}</option>`).join('')}</select></label>`:
+  `<label>${l}<input name="${id}" value="${esc(d)}"></label>`).join('');
+ S[k]=Object.fromEntries(G[k].f.map(([id,,t,d])=>[id,t=='i'?'':t=='s'?d[0]:d??'']));
+ $('#forms').append(f);
+}
+$('#nav').innerHTML=Object.entries(G).map(([k,g])=>`<button type="button" data-g="${k}">${g.name}</button>`).join('');
+$('#nav').onclick=e=>{if(e.target.dataset.g){cur=e.target.dataset.g;location.hash=cur;show()}};
+$('#forms').addEventListener('input',e=>{const el=e.target,k=el.form.dataset.g;
+ if(el.type=='file'){const r=new FileReader();r.onload=()=>{S[k][el.name]=r.result;render()};if(el.files[0])r.readAsDataURL(el.files[0]);return}
+ S[k][el.name]=el.type=='checkbox'?el.checked:el.value;render()});
+function show(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.g==cur));document.querySelectorAll('#forms form').forEach(f=>f.hidden=f.dataset.g!=cur);render()}
+function render(){$('#prev').innerHTML=`<div class="card ${cur}">${G[cur].r(S[cur])}<div class="stamp">mockup</div></div>`}
+show();
+
+// ---- export: DOM → SVG foreignObject → canvas → PNG. No library; needs only data: images + system fonts.
+// ponytail: Chromium-only (Safari taints the canvas). Swap in html-to-image if Macs ever matter.
+async function png(){
+ const n=$('#prev .card'),w=n.offsetWidth,h=n.offsetHeight,k=2;
+ const css=$('#css').textContent.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ const svg=`<svg xmlns="http://www.w3.org/2000/svg" width="${w*k}" height="${h*k}" viewBox="0 0 ${w} ${h}"><foreignObject width="${w}" height="${h}"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}</style>${new XMLSerializer().serializeToString(n)}</div></foreignObject></svg>`;
+ const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);await img.decode();
+ const cv=document.createElement('canvas');cv.width=w*k;cv.height=h*k;cv.getContext('2d').drawImage(img,0,0);
+ return new Promise(r=>cv.toBlob(r,'image/png'));
+}
+let tt;const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),1500)};
+$('#dl').onclick=async()=>{const a=document.createElement('a');a.href=URL.createObjectURL(await png());a.download=cur+'.png';a.click();toast('Saved')};
+$('#cp').onclick=async()=>{try{await navigator.clipboard.write([new ClipboardItem({'image/png':await png()})]);toast('Copied!')}catch(e){toast('Copy failed — use Download')}};
+
+if(location.hash=='#test'){
+ console.assert(JSON.stringify(cmts('a: b\n\nc'))=='[{"n":"a","t":"b"},{"n":"user","t":"c"}]','cmts');
+ console.assert(JSON.stringify(msgs('hi\n> yo'))=='[{"s":0,"t":"hi"},{"s":1,"t":"yo"}]','msgs');
+ console.log('tests ok');
+}
+</script>
