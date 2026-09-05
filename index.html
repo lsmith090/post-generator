@@ -18,6 +18,7 @@ label{font-size:.8rem;color:#555;display:flex;flex-direction:column;gap:.15rem}
 label.row{flex-direction:row;align-items:center;gap:.4rem}
 input,textarea,select{font:inherit;font-size:.95rem;padding:.35rem .5rem;border:1px solid #ccc;border-radius:.4rem}
 textarea{min-height:4.5rem;resize:vertical}
+.pics{display:contents}
 #out{display:flex;flex-direction:column;align-items:safe center;gap:.8rem;overflow-x:auto}
 #btns{display:flex;gap:.5rem}
 #btns button{font:inherit;padding:.5rem 1rem;border:0;border-radius:.5rem;background:#111;color:#fff;cursor:pointer}
@@ -176,7 +177,7 @@ const imT=d=>{const n=days(d);return n==0?['Today',tm(d)]:n==1?['Yesterday',tm(d
  [d.toLocaleDateString('en-US',yr(d)?{month:'short',day:'numeric',year:'numeric'}:{weekday:'short',month:'short',day:'numeric'}),'at '+tm(d)]};
 const ago2h=loc(new Date(Date.now()-72e5));
 
-// fields: [id, label, type, default]  types: t=text a=textarea i=image c=checkbox s=select d=datetime
+// fields: [id, label, type, default]  types: t=text a=textarea i=image c=checkbox s=select d=datetime p=people textarea (+ photo input per name, stored as S[k]['pic:'+name])
 const G={
 ig:{name:'Instagram',f:[
  ['user','Username','t','abraham.lincoln'],['ver','Verified','c',1],['avatar','Profile photo','i'],['loc','Location','t','Gettysburg, PA'],
@@ -198,7 +199,7 @@ x:{name:'X / Twitter',f:[
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty. #Gettysburg'],
  ['photo','Photo (optional)','i'],['time','Posted','d','1863-11-19T15:15'],['views','Views','t','272K'],
  ['rts','Reposts','t','1,863'],['quotes','Quotes','t','412'],['likes','Likes','t','16.3K'],['bms','Bookmarks','t','2,024'],
- ['replies','Replies (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ ['replies','Replies (one per line: name: text)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="x-h">${av(v.avatar,v.name)}<div><div class="x-n">${esc(v.name)}${v.ver?vb('#1d9bf0'):''}</div><div class="x-u">@${esc(v.handle)}</div></div>${dots}</div>
  <div class="x-t">${nl(v.text)}</div>
@@ -206,20 +207,20 @@ x:{name:'X / Twitter',f:[
  <div class="x-m">${xT(D(v.time))} · <b>${esc(v.views)}</b> Views</div>
  <div class="x-c"><span><b>${esc(v.rts)}</b> Reposts</span><span><b>${esc(v.quotes)}</b> Quotes</span><span><b>${esc(v.likes)}</b> Likes</span><span><b>${esc(v.bms)}</b> Bookmarks</span></div>
  <div class="x-a">${ic('cmt')}${ic('rt')}${ic('heart')}${ic('bm')}${ic('share')}</div>
- ${cmts(v.replies).map(x=>`<div class="x-r">${av('',x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
+ ${cmts(v.replies).map(x=>`<div class="x-r">${av(v['pic:'+x.n],x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
 fb:{name:'Facebook',f:[
  ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Posted','d',ago2h],
  ['priv','Privacy','s',['🌐 Public','👥 Friends','🔒 Only me']],
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.'],
  ['photo','Photo (optional)','i'],['rx','Reactions','t','1.8K'],['cc','Comments','t','412'],['sh','Shares','t','96'],
- ['cmts','Comments (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ ['cmts','Comments (one per line: name: text)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${fbT(D(v.time))} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
  <div class="fb-t">${nl(v.text)}</div>
  ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:''}
  <div class="fb-s"><span class="fb-rx"><i style="background:#1877f2">👍</i><i style="background:#f33e58">❤️</i><em>${esc(v.rx)}</em></span><span>${esc(v.cc)} comments · ${esc(v.sh)} shares</span></div>
  <div class="fb-a"><span>${ic('thumb')}Like</span><span>${ic('cmt')}Comment</span><span>${ic('share')}Share</span></div>
- ${cmts(v.cmts).map(x=>`<div class="fb-c">${av('',x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
+ ${cmts(v.cmts).map(x=>`<div class="fb-c">${av(v['pic:'+x.n],x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
 im:{name:'iMessage',f:[
  ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['time','Time','d',loc(new Date(new Date().setHours(9,41,0,0)))],
  ['sms','Green bubbles (SMS)','c',0],['deliv','Show "Delivered"','c',1],
@@ -237,7 +238,7 @@ const S={};let cur=G[location.hash.slice(1)]?location.hash.slice(1):'ig';
 for(const k in G){
  const f=document.createElement('form');f.dataset.g=k;f.hidden=true;
  f.innerHTML=G[k].f.map(([id,l,t,d])=>
-  t=='a'?`<label>${l}<textarea name="${id}">${esc(d)}</textarea></label>`:
+  t=='a'||t=='p'?`<label>${l}<textarea name="${id}">${esc(d)}</textarea></label>${t=='p'?'<div class="pics"></div>':''}`:
   t=='i'?`<label>${l}<input type="file" name="${id}" accept="image/*"></label>`:
   t=='d'?`<label>${l}<input type="datetime-local" name="${id}" value="${d}"></label>`:
   t=='c'?`<label class="row"><input type="checkbox" name="${id}" ${d?'checked':''}>${l}</label>`:
@@ -252,7 +253,12 @@ $('#forms').addEventListener('input',e=>{const el=e.target,k=el.form.dataset.g;
  if(el.type=='file'){const r=new FileReader();r.onload=()=>{S[k][el.name]=r.result;render()};if(el.files[0])r.readAsDataURL(el.files[0]);return}
  S[k][el.name]=el.type=='checkbox'?el.checked:el.value;render()});
 function show(){document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.g==cur));document.querySelectorAll('#forms form').forEach(f=>f.hidden=f.dataset.g!=cur);render()}
-function render(){$('#prev').innerHTML=`<div class="card ${cur}">${G[cur].r(S[cur])}<div class="stamp">mockup</div></div>`}
+function render(){$('#prev').innerHTML=`<div class="card ${cur}">${G[cur].r(S[cur])}<div class="stamp">mockup</div></div>`;pics()}
+// one photo input per unique responder name; rebuilt only when the name set changes
+function pics(){const box=$(`form[data-g=${cur}] .pics`);if(!box)return;
+ const src=G[cur].f.find(x=>x[2]=='p')[0],names=[...new Set(cmts(S[cur][src]).map(x=>x.n))],key=names.join('\n');
+ if(box.dataset.k==key)return;box.dataset.k=key;
+ box.innerHTML=names.map(n=>`<label class="row">${esc(n)} photo<input type="file" name="pic:${esc(n)}" accept="image/*"></label>`).join('')}
 show();
 
 // ---- export: DOM → SVG foreignObject → canvas → PNG. No library; needs only data: images + system fonts.
@@ -277,6 +283,7 @@ if(location.hash=='#test'){
  console.assert(xT(L)=='3:15 PM · Nov 19, 1863'&&igT(L)=='November 19, 1863'&&fbT(L)=='November 19, 1863','abs');
  console.assert(imT(L).join(' ')=='Nov 19, 1863 at 3:15 PM'&&imT(new Date()).join(' ').startsWith('Today '),'im');
  console.assert(igT(D(ago2h))=='2 hours ago'&&fbT(D(ago2h))=='2h','rel');
+ cur='x';show();console.assert(document.querySelectorAll('form[data-g=x] .pics input').length==2,'pics');
  console.log('tests ok');
 }
 </script>
