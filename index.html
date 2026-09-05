@@ -258,7 +258,7 @@ function render(){$('#prev').innerHTML=`<div class="card ${cur}">${G[cur].r(S[cu
 function pics(){const box=$(`form[data-g=${cur}] .pics`);if(!box)return;
  const src=G[cur].f.find(x=>x[2]=='p')[0],names=[...new Set(cmts(S[cur][src]).map(x=>x.n))],key=names.join('\n');
  if(box.dataset.k==key)return;box.dataset.k=key;
- box.innerHTML=names.map(n=>`<label class="row">${esc(n)} photo<input type="file" name="pic:${esc(n)}" accept="image/*"></label>`).join('')}
+ box.innerHTML=names.map(n=>`<label>${esc(n)} photo<input type="file" name="pic:${esc(n)}" accept="image/*"></label>`).join('')}
 show();
 
 // ---- export: DOM → SVG foreignObject → canvas → PNG. No library; needs only data: images + system fonts.
