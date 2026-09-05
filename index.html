@@ -18,7 +18,7 @@ label{font-size:.8rem;color:#555;display:flex;flex-direction:column;gap:.15rem}
 label.row{flex-direction:row;align-items:center;gap:.4rem}
 input,textarea,select{font:inherit;font-size:.95rem;padding:.35rem .5rem;border:1px solid #ccc;border-radius:.4rem}
 textarea{min-height:4.5rem;resize:vertical}
-#out{display:flex;flex-direction:column;align-items:center;gap:.8rem;overflow-x:auto}
+#out{display:flex;flex-direction:column;align-items:safe center;gap:.8rem;overflow-x:auto}
 #btns{display:flex;gap:.5rem}
 #btns button{font:inherit;padding:.5rem 1rem;border:0;border-radius:.5rem;background:#111;color:#fff;cursor:pointer}
 .hint{font-size:.8rem;color:#777;margin:0}
@@ -46,7 +46,8 @@ svg{display:inline-block;vertical-align:middle}
 .ig-acts .sp{flex:1}
 .ig-b{padding:2px 12px;line-height:1.35}
 .grey{color:#737373}
-.sm{font-size:11px;text-transform:uppercase;letter-spacing:.2px;padding-top:6px;padding-bottom:6px}
+.sm{font-size:12px;padding-top:6px;padding-bottom:6px}
+.ig .tag{color:#00376b}.x .tag{color:#1d9bf0}.fb .tag{color:#385898}
 
 /* ---- x / twitter ---- */
 .x{width:500px;padding:12px 16px;font-size:15px;border:1px solid #eff3f4;border-radius:16px;color:#0f1419}
@@ -96,8 +97,8 @@ svg{display:inline-block;vertical-align:middle}
 .bat{width:25px;height:12px;border:1px solid #0006;border-radius:4px;padding:1.5px;position:relative;display:block}
 .bat::before{content:"";display:block;height:100%;width:100%;background:#000;border-radius:2px}
 .bat::after{content:"";position:absolute;right:-4px;top:3px;width:2px;height:5px;background:#0006;border-radius:0 2px 2px 0}
-.im-h{display:flex;align-items:flex-end;justify-content:space-between;padding:4px 14px 8px;border-bottom:1px solid #e5e5ea;background:#f9f9f9}
-.im-h>svg{width:26px;height:26px;stroke:#007aff;margin-bottom:12px}
+.im-h{display:flex;align-items:flex-start;justify-content:space-between;padding:4px 14px 8px;border-bottom:1px solid #e5e5ea;background:#f9f9f9}
+.im-h>svg{width:26px;height:26px;stroke:#007aff;margin-top:12px}
 .im-c{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:#000}
 .im-c .av{width:50px;height:50px;font-size:20px}
 .im-msgs{display:flex;flex-direction:column;gap:2px;padding:12px 16px 4px;min-height:200px}
@@ -114,9 +115,11 @@ svg{display:inline-block;vertical-align:middle}
 .b.s.tail::before{right:-7px;border-bottom-left-radius:16px 14px;background:#007aff}
 .sms .b.s.tail::before{background:#34c759}
 .b.s.tail::after{right:-26px;border-bottom-left-radius:10px}
-.im-d{align-self:flex-end;color:#8e8e93;font-size:11px;font-weight:600;margin:-6px 4px 0 0}
-.im-in{display:flex;align-items:center;gap:10px;padding:8px 14px 26px}
-.im-plus{width:32px;height:32px;border-radius:50%;background:#e9e9eb;color:#8e8e93;display:grid;place-items:center;font-size:24px;line-height:1;flex:none}
+.im-d{align-self:flex-end;color:#8e8e93;font-size:11px;font-weight:600;margin:-6px 4px 6px 0}
+.im-in{display:flex;align-items:center;gap:10px;padding:8px 14px 20px}
+.im-home{width:134px;height:5px;background:#000;border-radius:3px;margin:0 auto 8px}
+.im-plus{width:32px;height:32px;border-radius:50%;background:#e9e9eb;color:#8e8e93;display:grid;place-items:center;flex:none}
+.im-plus svg{width:18px;height:18px}
 .im-pill{flex:1;border:1px solid #d1d1d6;border-radius:20px;padding:5px 8px 5px 12px;color:#c7c7cc;display:flex;justify-content:space-between;align-items:center;font-size:16px}
 .im-pill svg{width:20px;height:20px;stroke:#8e8e93}
 </style>
@@ -136,7 +139,7 @@ svg{display:inline-block;vertical-align:middle}
 <script>
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const nl=s=>esc(s).replace(/\n/g,'<br>');
+const nl=s=>esc(s).replace(/\n/g,'<br>').replace(/(^|\s)([#@]\w+)/g,'$1<span class="tag">$2</span>');
 const lines=s=>String(s).split('\n').map(l=>l.trim()).filter(Boolean);
 // "name: text" per line; no colon → anonymous "user"
 const cmts=s=>lines(s).map(l=>{const i=l.indexOf(':');return i<0?{n:'user',t:l}:{n:l.slice(0,i).trim(),t:l.slice(i+1).trim()}});
@@ -154,19 +157,33 @@ share:'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
 thumb:'M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3',
 back:'M15 18l-6-6 6-6',video:'M23 7l-7 5 7 5V7zM1 7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2z',
 wifi:'M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01',
-mic:'M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8'};
+mic:'M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v4M8 23h8',plus:'M12 5v14M5 12h14'};
 const ic=(k,a={})=>{a={fill:'none',stroke:'currentColor','stroke-width':2,...a};return `<svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" ${Object.entries(a).map(([k,v])=>`${k}="${v}"`).join(' ')}><path d="${P[k]}"/></svg>`};
 const vb=c=>`<svg class="vb" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="${c}"/><path d="M7 12.5l3 3 7-7" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const dots='<span class="dots">···</span>';
 
-// fields: [id, label, type, default]  types: t=text a=textarea i=image c=checkbox s=select
+// ---- dates: <input type=datetime-local> value → per-app label
+const D=v=>v?new Date(v):new Date(),loc=d=>new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
+const tm=d=>d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}).replace('\u202f',' ');
+const md=(d,y)=>d.toLocaleDateString('en-US',{month:'long',day:'numeric',...(y?{year:'numeric'}:{})});
+const yr=d=>d.getFullYear()!=new Date().getFullYear();
+const ago=d=>{const m=(Date.now()-d)/6e4;return m<60?[m|0||1,'minute']:m<1440?[m/60|0,'hour']:m<10080?[m/1440|0,'day']:null};
+const days=d=>Math.round((new Date().setHours(0,0,0,0)-new Date(d).setHours(0,0,0,0))/864e5);
+const igT=d=>{const a=ago(d);return a?`${a[0]} ${a[1]}${a[0]>1?'s':''} ago`:md(d,yr(d))};
+const fbT=d=>{const a=ago(d);return a?a[0]+a[1][0]:yr(d)?md(d,1):md(d)+' at '+tm(d)};
+const xT=d=>tm(d)+' · '+d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+const imT=d=>{const n=days(d);return n==0?['Today',tm(d)]:n==1?['Yesterday',tm(d)]:n>1&&n<7?[d.toLocaleDateString('en-US',{weekday:'long'}),tm(d)]:
+ [d.toLocaleDateString('en-US',yr(d)?{month:'short',day:'numeric',year:'numeric'}:{weekday:'short',month:'short',day:'numeric'}),'at '+tm(d)]};
+const ago2h=loc(new Date(Date.now()-72e5));
+
+// fields: [id, label, type, default]  types: t=text a=textarea i=image c=checkbox s=select d=datetime
 const G={
 ig:{name:'Instagram',f:[
  ['user','Username','t','abraham.lincoln'],['ver','Verified','c',1],['avatar','Profile photo','i'],['loc','Location','t','Gettysburg, PA'],
  ['photo','Post photo','i'],['cap','Caption','a','Four score and seven years ago… #Gettysburg #1863'],
  ['likes','Likes','t','1,863'],['liked','Liked (red heart)','c',1],
  ['cmts','Comments (one per line: name: text)','a','mary.todd: So proud of you ❤️\nu.s.grant: Well said, sir.'],
- ['time','Time ago','t','2 hours ago']],
+ ['time','Posted','d',ago2h]],
  r:v=>{const c=cmts(v.cmts);return `
  <div class="ig-h">${av(v.avatar,v.user)}<div><b>${esc(v.user)}${v.ver?vb('#0095f6'):''}</b><small>${esc(v.loc)}</small></div>${dots}</div>
  ${v.photo?`<img class="ig-img" src="${v.photo}" alt="">`:'<div class="ig-img ph"></div>'}
@@ -175,45 +192,44 @@ ig:{name:'Instagram',f:[
  <div class="ig-b"><b>${esc(v.user)}</b> ${nl(v.cap)}</div>
  ${c.length>2?`<div class="ig-b grey">View all ${c.length} comments</div>`:''}
  ${c.map(x=>`<div class="ig-b"><b>${esc(x.n)}</b> ${esc(x.t)}</div>`).join('')}
- <div class="ig-b grey sm">${esc(v.time)}</div>`}},
+ <div class="ig-b grey sm">${igT(D(v.time))}</div>`}},
 x:{name:'X / Twitter',f:[
  ['name','Name','t','Abraham Lincoln'],['handle','Handle','t','honestabe'],['ver','Verified','c',1],['avatar','Profile photo','i'],
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty. #Gettysburg'],
- ['photo','Photo (optional)','i'],['time','Time · date','t','3:15 PM · Nov 19, 1863'],['views','Views','t','272K'],
+ ['photo','Photo (optional)','i'],['time','Posted','d','1863-11-19T15:15'],['views','Views','t','272K'],
  ['rts','Reposts','t','1,863'],['quotes','Quotes','t','412'],['likes','Likes','t','16.3K'],['bms','Bookmarks','t','2,024'],
  ['replies','Replies (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="x-h">${av(v.avatar,v.name)}<div><div class="x-n">${esc(v.name)}${v.ver?vb('#1d9bf0'):''}</div><div class="x-u">@${esc(v.handle)}</div></div>${dots}</div>
  <div class="x-t">${nl(v.text)}</div>
  ${v.photo?`<img class="x-img" src="${v.photo}" alt="">`:''}
- <div class="x-m">${esc(v.time)} · <b>${esc(v.views)}</b> Views</div>
+ <div class="x-m">${xT(D(v.time))} · <b>${esc(v.views)}</b> Views</div>
  <div class="x-c"><span><b>${esc(v.rts)}</b> Reposts</span><span><b>${esc(v.quotes)}</b> Quotes</span><span><b>${esc(v.likes)}</b> Likes</span><span><b>${esc(v.bms)}</b> Bookmarks</span></div>
  <div class="x-a">${ic('cmt')}${ic('rt')}${ic('heart')}${ic('bm')}${ic('share')}</div>
  ${cmts(v.replies).map(x=>`<div class="x-r">${av('',x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
 fb:{name:'Facebook',f:[
- ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Time','t','2h'],
+ ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Posted','d',ago2h],
  ['priv','Privacy','s',['🌐 Public','👥 Friends','🔒 Only me']],
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.'],
  ['photo','Photo (optional)','i'],['rx','Reactions','t','1.8K'],['cc','Comments','t','412'],['sh','Shares','t','96'],
  ['cmts','Comments (one per line: name: text)','a','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
- <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${esc(v.time)} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
+ <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${fbT(D(v.time))} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
  <div class="fb-t">${nl(v.text)}</div>
  ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:''}
  <div class="fb-s"><span class="fb-rx"><i style="background:#1877f2">👍</i><i style="background:#f33e58">❤️</i><em>${esc(v.rx)}</em></span><span>${esc(v.cc)} comments · ${esc(v.sh)} shares</span></div>
  <div class="fb-a"><span>${ic('thumb')}Like</span><span>${ic('cmt')}Comment</span><span>${ic('share')}Share</span></div>
  ${cmts(v.cmts).map(x=>`<div class="fb-c">${av('',x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
 im:{name:'iMessage',f:[
- ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['clock','Clock','t','9:41'],['date','Date label','t','Today 9:41 AM'],
+ ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['time','Time','d',loc(new Date(new Date().setHours(9,41,0,0)))],
  ['sms','Green bubbles (SMS)','c',0],['deliv','Show "Delivered"','c',1],
  ['msgs','Messages (start a line with > for your own)','a','Did you finish your homework?\n>Almost done!\n>Can I go to Sam\'s after?\nSure. Be home by 6 🙂']],
- r:v=>{const m=msgs(v.msgs),[d1,...d2]=v.date.split(' ');return `
- <div class="im-sb"><b>${esc(v.clock)}</b><span><span class="sig"><i></i><i></i><i></i><i></i></span>${ic('wifi',{'stroke-width':2.5})}<i class="bat"></i></span></div>
+ r:v=>{const m=msgs(v.msgs),d=D(v.time),[d1,d2]=imT(d),last=m.findLastIndex(x=>x.s);return `
+ <div class="im-sb"><b>${tm(d).replace(/ [AP]M/,'')}</b><span><span class="sig"><i></i><i></i><i></i><i></i></span>${ic('wifi',{'stroke-width':2.5})}<i class="bat"></i></span></div>
  <div class="im-h">${ic('back',{'stroke-width':2.5})}<div class="im-c">${av(v.avatar,v.name)}<small>${esc(v.name)} ›</small></div>${ic('video')}</div>
- <div class="im-msgs ${v.sms?'sms':''}"><div class="im-date"><b>${esc(d1)}</b> ${esc(d2.join(' '))}</div>
- ${m.map((x,i)=>`<div class="b ${x.s?'s':'r'} ${!m[i+1]||m[i+1].s!=x.s?'tail':''}">${esc(x.t)}</div>`).join('')}
- ${v.deliv&&m.length&&m[m.length-1].s?'<div class="im-d">Delivered</div>':''}</div>
- <div class="im-in"><span class="im-plus">+</span><div class="im-pill">${v.sms?'Text Message':'iMessage'}${ic('mic',{'stroke-width':1.8})}</div></div>`}}
+ <div class="im-msgs ${v.sms?'sms':''}"><div class="im-date"><b>${d1}</b> ${d2}</div>
+ ${m.map((x,i)=>`<div class="b ${x.s?'s':'r'} ${!m[i+1]||m[i+1].s!=x.s?'tail':''}">${esc(x.t)}</div>${v.deliv&&i==last?'<div class="im-d">Delivered</div>':''}`).join('')}</div>
+ <div class="im-in"><span class="im-plus">${ic('plus',{'stroke-width':2.2})}</span><div class="im-pill">${v.sms?'Text Message':'iMessage'}${ic('mic',{'stroke-width':1.8})}</div></div><div class="im-home"></div>`}}
 };
 
 // ---- forms + state ----
@@ -223,6 +239,7 @@ for(const k in G){
  f.innerHTML=G[k].f.map(([id,l,t,d])=>
   t=='a'?`<label>${l}<textarea name="${id}">${esc(d)}</textarea></label>`:
   t=='i'?`<label>${l}<input type="file" name="${id}" accept="image/*"></label>`:
+  t=='d'?`<label>${l}<input type="datetime-local" name="${id}" value="${d}"></label>`:
   t=='c'?`<label class="row"><input type="checkbox" name="${id}" ${d?'checked':''}>${l}</label>`:
   t=='s'?`<label>${l}<select name="${id}">${d.map(o=>`<option>${o}</option>`).join('')}</select></label>`:
   `<label>${l}<input name="${id}" value="${esc(d)}"></label>`).join('');
@@ -255,6 +272,11 @@ $('#cp').onclick=async()=>{try{await navigator.clipboard.write([new ClipboardIte
 if(location.hash=='#test'){
  console.assert(JSON.stringify(cmts('a: b\n\nc'))=='[{"n":"a","t":"b"},{"n":"user","t":"c"}]','cmts');
  console.assert(JSON.stringify(msgs('hi\n> yo'))=='[{"s":0,"t":"hi"},{"s":1,"t":"yo"}]','msgs');
+ console.assert(nl('a #b @c d&e')=='a <span class="tag">#b</span> <span class="tag">@c</span> d&amp;e','tags');
+ const L=new Date(1863,10,19,15,15);
+ console.assert(xT(L)=='3:15 PM · Nov 19, 1863'&&igT(L)=='November 19, 1863'&&fbT(L)=='November 19, 1863','abs');
+ console.assert(imT(L).join(' ')=='Nov 19, 1863 at 3:15 PM'&&imT(new Date()).join(' ').startsWith('Today '),'im');
+ console.assert(igT(D(ago2h))=='2 hours ago'&&fbT(D(ago2h))=='2h','rel');
  console.log('tests ok');
 }
 </script>
