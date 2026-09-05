@@ -143,8 +143,8 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nl=s=>esc(s).replace(/\n/g,'<br>').replace(/(^|\s)([#@]\w+)/g,'$1<span class="tag">$2</span>');
 const lines=s=>String(s).split('\n').map(l=>l.trim()).filter(Boolean);
-// "name: text" per line; no colon → anonymous "user". Capped at 5 (semi-realistic feed preview)
-const cmts=s=>lines(s).slice(0,5).map(l=>{const i=l.indexOf(':');return i<0?{n:'user',t:l}:{n:l.slice(0,i).trim(),t:l.slice(i+1).trim()}});
+// "name: text" per line; no colon → anonymous "user". Capped: IG 5, X/FB 10
+const cmts=(s,max=5)=>lines(s).slice(0,max).map(l=>{const i=l.indexOf(':');return i<0?{n:'user',t:l}:{n:l.slice(0,i).trim(),t:l.slice(i+1).trim()}});
 // lines starting with ">" are sent (blue), everything else received (grey). Capped at 12 (one screen)
 const msgs=s=>lines(s).slice(0,12).map(l=>l[0]=='>'?{s:1,t:l.slice(1).trim()}:{s:0,t:l});
 const hue=s=>[...s].reduce((h,c)=>(h*31+c.charCodeAt(0))%360,0);
@@ -202,7 +202,7 @@ x:{name:'X / Twitter',f:[
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty. #Gettysburg'],
  ['photo','Photo (optional)','i'],['time','Posted','d','1863-11-19T15:15'],['views','Views','n',272000],
  ['rts','Reposts','n',1863],['quotes','Quotes','n',412],['likes','Likes','n',16300],['bms','Bookmarks','n',2024],
- ['replies','Replies (one per line: name: text, max 5)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ ['replies','Replies (one per line: name: text, max 10)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="x-h">${av(v.avatar,v.name)}<div><div class="x-n">${esc(v.name)}${v.ver?vb('#1d9bf0'):''}</div><div class="x-u">@${esc(v.handle)}</div></div>${dots}</div>
  <div class="x-t">${nl(v.text)}</div>
@@ -210,20 +210,20 @@ x:{name:'X / Twitter',f:[
  <div class="x-m">${xT(D(v.time))} · <b>${num(v.views)}</b> Views</div>
  <div class="x-c"><span><b>${num(v.rts)}</b> Reposts</span><span><b>${num(v.quotes)}</b> Quotes</span><span><b>${num(v.likes)}</b> Likes</span><span><b>${num(v.bms)}</b> Bookmarks</span></div>
  <div class="x-a">${ic('cmt')}${ic('rt')}${ic('heart')}${ic('bm')}${ic('share')}</div>
- ${cmts(v.replies).map(x=>`<div class="x-r">${av(v['pic:'+x.n]||(x.n==v.name?v.avatar:''),x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
+ ${cmts(v.replies,10).map(x=>`<div class="x-r">${av(v['pic:'+x.n]||(x.n==v.name?v.avatar:''),x.n)}<div><div class="x-n">${esc(x.n)}<span class="x-u">&#160;@${esc(x.n.toLowerCase().replace(/\W/g,''))} · 1h</span></div><div>${esc(x.t)}</div></div></div>`).join('')}`},
 fb:{name:'Facebook',f:[
  ['name','Name','t','Abraham Lincoln'],['ver','Verified','c',0],['avatar','Profile photo','i'],['time','Posted','d',ago2h],
  ['priv','Privacy','s',['🌐 Public','👥 Friends','🔒 Only me']],
  ['text','Post text','a','Four score and seven years ago our fathers brought forth on this continent, a new nation, conceived in Liberty, and dedicated to the proposition that all men are created equal.'],
  ['photo','Post photo','i'],['rx','Reactions','n',1800],['cc','Comments','n',412],['sh','Shares','n',96],
- ['cmts','Comments (one per line: name: text, max 5)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
+ ['cmts','Comments (one per line: name: text, max 10)','p','Mary Todd: So proud of you ❤️\nUlysses S. Grant: Well said, sir.']],
  r:v=>`
  <div class="fb-h">${av(v.avatar,v.name)}<div><b>${esc(v.name)}${v.ver?vb('#1877f2'):''}</b><small>${fbT(D(v.time))} · ${esc(v.priv.slice(0,2))}</small></div>${dots}</div>
  <div class="fb-t">${nl(v.text)}</div>
  ${v.photo?`<img class="fb-img" src="${v.photo}" alt="">`:'<div class="fb-img ph"></div>'}
  <div class="fb-s"><span class="fb-rx"><i style="background:#1877f2">👍</i><i style="background:#f33e58">❤️</i><em>${num(v.rx,1e3)}</em></span><span>${num(v.cc,1e3)} comments · ${num(v.sh,1e3)} shares</span></div>
  <div class="fb-a"><span>${ic('thumb')}Like</span><span>${ic('cmt')}Comment</span><span>${ic('share')}Share</span></div>
- ${cmts(v.cmts).map(x=>`<div class="fb-c">${av(v['pic:'+x.n]||(x.n==v.name?v.avatar:''),x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
+ ${cmts(v.cmts,10).map(x=>`<div class="fb-c">${av(v['pic:'+x.n]||(x.n==v.name?v.avatar:''),x.n)}<div><b>${esc(x.n)}</b>${esc(x.t)}</div></div><div class="fb-cm"><span>1h</span><span>Like</span><span>Reply</span></div>`).join('')}`},
 im:{name:'iMessage',f:[
  ['name','Contact name','t','Mom'],['avatar','Contact photo','i'],['time','Time','d',loc(new Date(new Date().setHours(9,41,0,0)))],
  ['sms','Green bubbles (SMS)','c',0],['rcpt','Receipt under last sent','s',['Delivered','Read','None']],['rt','Read time','h','09:42'],
@@ -260,7 +260,7 @@ function show(){document.querySelectorAll('nav button').forEach(b=>b.classList.t
 function render(){$('#prev').innerHTML=`<div class="card ${cur}">${G[cur].r(S[cur])}<div class="stamp">mockup</div></div>`;pics()}
 // one photo input per unique responder name (author reuses their own photo); rebuilt only when the name set changes
 function pics(){const box=$(`form[data-g=${cur}] .pics`);if(!box)return;
- const src=G[cur].f.find(x=>x[2]=='p')[0],names=[...new Set(cmts(S[cur][src]).map(x=>x.n))].filter(n=>n!=S[cur].name),key=names.join('\n');
+ const src=G[cur].f.find(x=>x[2]=='p')[0],names=[...new Set(cmts(S[cur][src],10).map(x=>x.n))].filter(n=>n!=S[cur].name),key=names.join('\n');
  if(box.dataset.k==key)return;box.dataset.k=key;
  box.innerHTML=names.map(n=>`<label>${esc(n)} photo<input type="file" name="pic:${esc(n)}" accept="image/*"></label>`).join('')}
 show();
@@ -289,7 +289,7 @@ if(location.hash=='#test'){
  console.assert(igT(D(ago2h))=='2 hours ago'&&fbT(D(ago2h))=='2h','rel');
  cur='x';show();console.assert(document.querySelectorAll('form[data-g=x] .pics input').length==2,'pics');
  console.assert([num(999),num(1863),num(16300),num(272000),num(1200000),num(1800,1e3),num(12000,1e3),num(1863,Infinity),num('')].join()=='999,1,863,16.3K,272K,1.2M,1.8K,12K,1,863,0','num');
- console.assert(cmts('a\n'.repeat(9)).length==5&&msgs('a\n'.repeat(20)).length==12,'caps');
+ console.assert(cmts('a\n'.repeat(9)).length==5&&cmts('a\n'.repeat(12),10).length==10&&msgs('a\n'.repeat(20)).length==12,'caps');
  console.log('tests ok');
 }
 </script>
